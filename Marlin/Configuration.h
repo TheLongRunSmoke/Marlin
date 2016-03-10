@@ -40,6 +40,7 @@ Here are some standard links for getting your machine calibrated:
 #define MY_BEDLEVELING_DEFAULTS // comment this out to strip out all the bed leveling stuff
 
 //#define MJRICE_BEDLEVELING_RACK // include this (only) if using the rack-and-pinion aparatus for bed probing / leveling
+//#define MJRICE_BEDLEVELING_RACK_MAX_ENDSTOP // Uncomment, if X axis home in maximum position.
 
 #ifdef MY_BEDLEVELING_DEFAULTS
  #define ENABLE_AUTO_BED_LEVELING // Delete the comment to enable (remove // at the start of the line)
@@ -836,4 +837,3 @@ const bool Z_PROBE_ENDSTOP_INVERTING = false; // set to true to invert the logic
 //#define FILAMENT_LCD_DISPLAY
 
 #endif //CONFIGURATION_H
-

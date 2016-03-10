@@ -1166,7 +1166,13 @@ static void engage_z_probe()
     {
       // raise the Z axis before homing X or Z
       float x_before = current_position[X_AXIS];
-      do_blocking_move_to(0, current_position[Y_AXIS], current_position[Z_AXIS]+Z_RAISE_BEFORE_HOMING);
+      
+      #ifndef MJRICE_BEDLEVELING_RACK_MAX_ENDSTOP
+          do_blocking_move_to(0, current_position[Y_AXIS], current_position[Z_AXIS]+Z_RAISE_BEFORE_PROBING);
+      #else
+          do_blocking_move_to(X_MAX_POS, current_position[Y_AXIS], current_position[Z_AXIS]+Z_RAISE_BEFORE_PROBING);
+      #endif
+      
       Z_ProbeState = PROBE_STATE_EXTENDED;
       do_blocking_move_to(x_before, current_position[Y_AXIS], current_position[Z_AXIS]); // put X back where we found it
     }
@@ -1192,9 +1198,13 @@ static void retract_z_probe()
     if(Z_ProbeState != PROBE_STATE_RETRACTED) 
     {
       float x_before = current_position[X_AXIS];
-
-      // raise the z axis a little bit and then move x axis all the way to the right to raise the probe
-      do_blocking_move_to(X_MAX_POS, current_position[Y_AXIS], current_position[Z_AXIS]+Z_RAISE_BEFORE_PROBING);
+      
+      #ifndef MJRICE_BEDLEVELING_RACK_MAX_ENDSTOP
+          // raise the z axis a little bit and then move x axis all the way to the right to raise the probe
+          do_blocking_move_to(X_MAX_POS, current_position[Y_AXIS], current_position[Z_AXIS]+Z_RAISE_AFTER_PROBING);
+      #else
+          do_blocking_move_to(X_MIN_POS, current_position[Y_AXIS], current_position[Z_AXIS]+Z_RAISE_AFTER_PROBING);
+      #endif
 
       Z_ProbeState = PROBE_STATE_RETRACTED;
 
@@ -1469,7 +1479,11 @@ void go_home()
     #error remove this line if you meant to do this
           if((home_all_axis) || (code_seen(axis_codes[Z_AXIS]))) {
             #if defined (Z_RAISE_BEFORE_HOMING) && (Z_RAISE_BEFORE_HOMING > 0)
-              destination[Z_AXIS] = Z_RAISE_BEFORE_HOMING * home_dir(Z_AXIS) * (-1);    // Set destination away from bed
+              #ifndef MJRICE_BEDLEVELING_RACK
+                  destination[Z_AXIS] = Z_RAISE_BEFORE_HOMING * home_dir(Z_AXIS) * (-1);    // Set destination away from bed
+              #else
+                  destination[Z_AXIS] = home_dir(Z_AXIS) * (-1);    // Set destination away from bed
+              #endif
               feedrate = max_feedrate[Z_AXIS];
               plan_buffer_line(destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS], destination[E_AXIS], feedrate, active_extruder);
               st_synchronize();
@@ -1481,7 +1495,11 @@ void go_home()
     {
         destination[X_AXIS] = round(Z_SAFE_HOMING_X_POINT - X_PROBE_OFFSET_FROM_EXTRUDER);
         destination[Y_AXIS] = round(Z_SAFE_HOMING_Y_POINT - Y_PROBE_OFFSET_FROM_EXTRUDER);
-        destination[Z_AXIS] = Z_RAISE_BEFORE_HOMING * home_dir(Z_AXIS) * (-1);    // Set destination away from bed
+        #ifndef MJRICE_BEDLEVELING_RACK
+            destination[Z_AXIS] = Z_RAISE_BEFORE_HOMING * home_dir(Z_AXIS) * (-1);    // Set destination away from bed
+        #else
+            destination[Z_AXIS] = home_dir(Z_AXIS) * (-1);    // Set destination away from bed
+        #endif
         feedrate = XY_TRAVEL_SPEED / 60;
         current_position[Z_AXIS] = 0;
 
